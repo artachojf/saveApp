@@ -2,6 +2,7 @@ package es.artachojf.saveapp.core.utils
 
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import es.artachojf.saveapp.BuildConfig
 import java.security.MessageDigest
 import java.util.UUID
 
@@ -18,10 +19,9 @@ object LoginUtils {
     fun generateGoogleCredentialRequest(
         hashedNonce: String
     ): GetCredentialRequest {
-        //TODO: Mover clientId a sitio seguro
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
-            .setServerClientId("")
+            .setServerClientId(BuildConfig.GOOGLE_CLIENT_ID)
             .setAutoSelectEnabled(false)
             .setNonce(hashedNonce)
             .build()

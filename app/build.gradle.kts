@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -21,6 +23,27 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        android.buildFeatures.buildConfig = true
+
+
+        val keystoreFile = project.rootProject.file("environment.properties")
+        val properties = Properties()
+        properties.load(keystoreFile.inputStream())
+        buildConfigField(
+            type = "String",
+            name = "SUPABASE_API_KEY",
+            value = properties.getProperty("SUPABASE_API_KEY") ?: "")
+        buildConfigField(
+            type = "String",
+            name = "SUPABASE_URL",
+            value = properties.getProperty("SUPABASE_URL") ?: ""
+        )
+        buildConfigField(
+            type = "String",
+            name = "GOOGLE_CLIENT_ID",
+            value = properties.getProperty("GOOGLE_CLIENT_ID") ?: ""
+        )
     }
 
     buildTypes {
