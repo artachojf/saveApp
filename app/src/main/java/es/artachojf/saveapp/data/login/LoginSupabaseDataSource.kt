@@ -5,6 +5,7 @@ import androidx.credentials.GetCredentialResponse
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import es.artachojf.saveapp.core.Result
+import es.artachojf.saveapp.domain.login.LoginError
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.gotrue.auth
@@ -19,7 +20,7 @@ class LoginSupabaseDataSource @Inject constructor(
     suspend fun loginWithGoogle(
         result: GetCredentialResponse,
         rawNonce: String
-    ): Result<Unit, Unit> {
+    ): Result<Unit, LoginError> {
         return try {
             val googleIdTokenCredential = GoogleIdTokenCredential
                 .createFrom(result.credential.data)
@@ -43,27 +44,27 @@ class LoginSupabaseDataSource @Inject constructor(
         }
     }
 
-    private fun handleFailure(e: Exception): Result<Nothing, Unit> {
+    private fun handleFailure(e: Exception): Result<Nothing, LoginError> {
         e.printStackTrace()
-        return Result.Failure(Unit)
+        return Result.Failure(LoginError.GenericLoginError)
     }
 
-    suspend fun loginAnonymously(): Result<Unit, Unit> {
+    suspend fun loginAnonymously(): Result<Unit, LoginError> {
         return try {
             supabase.auth.signInAnonymously()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Failure(Unit)
+            Result.Failure(LoginError.GenericLoginError)
         }
     }
 
-    suspend fun getLoggedUser(): Result<UserInfo?, Unit> {
+    suspend fun getLoggedUser(): Result<UserInfo?, LoginError> {
         return try {
             supabase.auth.sessionManager.loadSession()?.user.let {
                 Result.Success(it)
             }
         } catch (e: Exception) {
-            Result.Failure(Unit)
+            Result.Failure(LoginError.GetLoggedUserError)
         }
     }
 

@@ -12,7 +12,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import es.artachojf.saveapp.R
 
 @Composable
 fun HomeScreen(
@@ -41,7 +43,7 @@ fun HomeScreen(
 
             is HomeUIState.Idle -> {
                 Button(onClick = { viewModel.onLogout() }) {
-                    Text(text = "Logout")
+                    Text(text = stringResource(id = R.string.logout_button))
                 }
             }
 

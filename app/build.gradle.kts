@@ -60,6 +60,12 @@ dependencies {
     val ktorVersion = "2.3.13"
     val credentialsManagerVersion = "1.1.1"
 
+    val junitVersion = "4.13.2"
+    val mockkVersion = "1.13.17"
+    val coroutinesVersion = "1.8.1"
+    val truthVersion = "1.4.4"
+    val turbineVersion = "1.2.0"
+
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.activity:activity-compose:1.10.1")
@@ -68,11 +74,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
@@ -90,6 +91,18 @@ dependencies {
     implementation("androidx.credentials:credentials:$credentialsManagerVersion")
     implementation("androidx.credentials:credentials-play-services-auth:$credentialsManagerVersion")
     implementation("com.google.android.libraries.identity.googleid:googleid:$credentialsManagerVersion")
+
+    testImplementation("junit:junit:$junitVersion")
+    testImplementation("io.mockk:mockk:${mockkVersion}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion") {
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-debug")
+    }
+    testImplementation("com.google.truth:truth:$truthVersion")
+    testImplementation("app.cash.turbine:turbine:$turbineVersion")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 }
 
 kapt {

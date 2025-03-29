@@ -16,10 +16,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialResponse
 import androidx.hilt.navigation.compose.hiltViewModel
+import es.artachojf.saveapp.R
 import es.artachojf.saveapp.core.utils.LoginUtils
+import es.artachojf.saveapp.domain.login.LoginError
+import es.artachojf.saveapp.domain.login.login.model.LoginMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -39,7 +42,12 @@ fun LoginScreen(
 
             is LoginUIState.Idle -> {
                 (uiState as LoginUIState.Idle).error?.let {
-                    Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                    val resource = when (it) {
+                        is LoginError.GenericLoginError -> R.string.generic_login_error
+
+                        is LoginError.GetLoggedUserError -> R.string.get_logged_user_error
+                    }
+                    Toast.makeText(context, context.getString(resource), Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -57,11 +65,8 @@ fun LoginScreen(
 
             is LoginUIState.Idle -> {
                 IdleLoginScreen(
-                    loginWithGoogle = { result, nonce ->
-                        viewModel.loginWithGoogle(result, nonce)
-                    },
-                    loginAnonymously = {
-                        viewModel.loginAnonymously()
+                    login = { method ->
+                        viewModel.login(method)
                     }
                 )
             }
@@ -73,8 +78,7 @@ fun LoginScreen(
 
 @Composable
 fun IdleLoginScreen(
-    loginWithGoogle: (GetCredentialResponse, String) -> Unit,
-    loginAnonymously: () -> Unit
+    login: (LoginMethod) -> Unit,
 ) {
     val coroutine = rememberCoroutineScope()
     val context = LocalContext.current
@@ -91,7 +95,7 @@ fun IdleLoginScreen(
                     request = request,
                     context = context,
                 )
-                loginWithGoogle(result, rawNonce)
+                login(LoginMethod.GoogleLogin(result, rawNonce))
             } catch (e: Exception) {
                 e.printStackTrace()
                 //TODO: Gestion excepciones
@@ -100,13 +104,13 @@ fun IdleLoginScreen(
     }
 
     val onAnonymousLogin = {
-        loginAnonymously()
+        login(LoginMethod.AnonymousLogin)
     }
 
     Button(onClick = { onGoogleLogin() }) {
-        Text(text = "Sign in with Google")
+        Text(text = stringResource(id = R.string.google_button))
     }
     TextButton(onClick = { onAnonymousLogin() }) {
-        Text(text = "Continue without login")
+        Text(text = stringResource(id = R.string.anonymous_button))
     }
 }

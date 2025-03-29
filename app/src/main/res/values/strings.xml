@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">SaveApp</string>
+
+    <!-- Login screen -->
+    <string name="google_button">Sign in with Google</string>
+    <string name="anonymous_button">Continue without login</string>
+    <string name="generic_login_error">"Login error!"</string>
+    <string name="get_logged_user_error">"There was an error retrieving the logged user. Please login again."</string>
+
+    <!-- Home screen -->
+    <string name="logout_button">Logout</string>
 </resources>
