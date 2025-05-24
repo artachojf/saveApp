@@ -1,7 +1,7 @@
 package es.artachojf.saveapp.domain.login
 
-sealed class LoginError {
-    object GenericLoginError : LoginError()
-
-    object GetLoggedUserError : LoginError()
+sealed interface LoginError {
+    data object GenericLoginError : LoginError
+    data object GetLoggedUserError : LoginError
+    data object LogoutError : LoginError
 }

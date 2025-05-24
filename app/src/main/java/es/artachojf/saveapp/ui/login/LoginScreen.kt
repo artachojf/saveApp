@@ -20,8 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import es.artachojf.saveapp.R
 import es.artachojf.saveapp.core.utils.LoginUtils
-import es.artachojf.saveapp.domain.login.LoginError
 import es.artachojf.saveapp.domain.login.login.model.LoginMethod
+import es.artachojf.saveapp.ui.login.model.LoginUIEvent
+import es.artachojf.saveapp.ui.utils.getStringResource
 
 @Composable
 fun LoginScreen(
@@ -29,23 +30,21 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val uiEvent by viewModel.uiEvent.collectAsState(initial = LoginUIEvent.Idle)
     val context = LocalContext.current
 
-    LaunchedEffect(uiState) {
-        when (uiState) {
-            is LoginUIState.Success -> {
+    LaunchedEffect(uiEvent) {
+        when (uiEvent) {
+            is LoginUIEvent.LoginSuccess -> {
                 navigateToHome()
             }
 
-            is LoginUIState.Idle -> {
-                (uiState as LoginUIState.Idle).error?.let {
-                    val resource = when (it) {
-                        is LoginError.GenericLoginError -> R.string.generic_login_error
-
-                        is LoginError.GetLoggedUserError -> R.string.get_logged_user_error
-                    }
-                    Toast.makeText(context, context.getString(resource), Toast.LENGTH_LONG).show()
-                }
+            is LoginUIEvent.Error -> {
+                Toast.makeText(
+                    context,
+                    context.getString((uiEvent as LoginUIEvent.Error).error.getStringResource()),
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
             else -> {}
@@ -57,18 +56,16 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        when (uiState) {
-            is LoginUIState.Loading -> CircularProgressIndicator()
+        when (uiState.isLoading) {
+            true -> CircularProgressIndicator()
 
-            is LoginUIState.Idle -> {
+            false -> {
                 IdleLoginScreen(
                     login = { method ->
                         viewModel.login(method)
                     }
                 )
             }
-
-            else -> {}
         }
     }
 }

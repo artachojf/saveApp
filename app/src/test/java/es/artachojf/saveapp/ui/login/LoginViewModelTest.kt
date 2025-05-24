@@ -9,12 +9,16 @@ import es.artachojf.saveapp.domain.login.login.Login
 import es.artachojf.saveapp.domain.login.login.model.LoginMethod
 import es.artachojf.saveapp.domain.login.user.GetLoggedUser
 import es.artachojf.saveapp.domain.login.user.model.UserBusiness
+import es.artachojf.saveapp.ui.login.model.LoginUIEvent
+import es.artachojf.saveapp.ui.login.model.LoginUIState
 import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -57,52 +61,63 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `initial uiState is Idle`() = runTest {
+    fun `uiState initial value is default`() = runTest {
         assertThat(viewModel.uiState.value)
-            .isEqualTo(LoginUIState.Idle())
+            .isEqualTo(LoginUIState())
     }
 
     @Test
-    fun `given user already logged when app initiates then state success`() = runTest {
+    fun `given user already logged when app initiates then success event`() = runTest {
         coEvery { getLoggedUserUseCase() } returns Result.Success(UserBusiness())
 
         advanceUntilIdle()
         viewModel.uiState.test {
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Success::class.java)
+            assertThat(awaitItem()).isEqualTo(LoginUIState(isLoading = false))
+            assertThat(awaitItem()).isEqualTo(LoginUIState(isLoading = true))
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        viewModel.uiEvent.test {
+            assertThat(awaitItem()).isEqualTo(LoginUIEvent.LoginSuccess)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `given user not logged when app initiates then state idle`() = runTest {
+    fun `given user not logged when app initiates then no event`() = runTest {
         coEvery { getLoggedUserUseCase() } returns Result.Success(null)
 
         advanceUntilIdle()
         viewModel.uiState.test {
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
+            assertThat(awaitItem()).isEqualTo(LoginUIState(isLoading = false))
+            assertThat(awaitItem()).isEqualTo(LoginUIState(isLoading = true))
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        viewModel.uiEvent.test {
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `given error fetching user when app initiates then state idle`() = runTest {
+    fun `given error fetching user when app initiates then error event`() = runTest {
         coEvery { getLoggedUserUseCase() } returns Result.Failure(LoginError.GetLoggedUserError)
 
         advanceUntilIdle()
         viewModel.uiState.test {
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
+            assertThat(awaitItem()).isEqualTo(LoginUIState(isLoading = false))
+            assertThat(awaitItem()).isEqualTo(LoginUIState(isLoading = true))
+            cancelAndIgnoreRemainingEvents()
+        }
 
-            val idleState = awaitItem()
-            assertThat(idleState).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat((idleState as LoginUIState.Idle).error).isNotNull()
+        viewModel.uiEvent.test {
+            assertThat(awaitItem()).isInstanceOf(LoginUIEvent.Error::class.java)
         }
     }
 
     @Test
-    fun `when successful login with google then state success`() = runTest(testDispatcher) {
+    fun `when successful login with google then success`() = runTest(testDispatcher) {
         coEvery { getLoggedUserUseCase() } returns Result.Success(null)
 
         val credentialResponse = mockk<GetCredentialResponse>()
@@ -113,22 +128,16 @@ class LoginViewModelTest {
         } returns Result.Success(Unit)
 
         advanceUntilIdle()
+        viewModel.login(LoginMethod.GoogleLogin(credentialResponse, "nonce-test"))
 
-        viewModel.uiState.test {
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-
-            viewModel.login(LoginMethod.GoogleLogin(credentialResponse, "nonce-test"))
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Success::class.java)
-
+        viewModel.uiEvent.test {
+            assertThat(awaitItem()).isEqualTo(LoginUIEvent.LoginSuccess)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `when error login with google then state idle`() = runTest(testDispatcher) {
+    fun `when error login with google then error event`() = runTest(testDispatcher) {
         coEvery { getLoggedUserUseCase() } returns Result.Success(null)
 
         val credentialResponse = mockk<GetCredentialResponse>()
@@ -139,28 +148,18 @@ class LoginViewModelTest {
         } returns Result.Failure(LoginError.GenericLoginError)
 
         advanceUntilIdle()
+        viewModel.login(LoginMethod.GoogleLogin(credentialResponse, "nonce-test"))
 
-        viewModel.uiState.test {
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-
-            viewModel.login(LoginMethod.GoogleLogin(credentialResponse, "nonce-test"))
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-
-            val idleState = awaitItem()
-            assertThat(idleState).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat((idleState as LoginUIState.Idle).error).isNotNull()
-
+        viewModel.uiEvent.test {
+            assertThat(awaitItem()).isEqualTo(LoginUIEvent.Error(LoginError.GenericLoginError))
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `when successful anonymous login then state success`() = runTest(testDispatcher) {
+    fun `when successful anonymous login then success`() = runTest(testDispatcher) {
         coEvery { getLoggedUserUseCase() } returns Result.Success(null)
 
-        val credentialResponse = mockk<GetCredentialResponse>()
         coEvery {
             loginUseCase(
                 LoginMethod.AnonymousLogin
@@ -168,16 +167,10 @@ class LoginViewModelTest {
         } returns Result.Success(Unit)
 
         advanceUntilIdle()
+        viewModel.login(LoginMethod.AnonymousLogin)
 
-        viewModel.uiState.test {
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-
-            viewModel.login(LoginMethod.AnonymousLogin)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Success::class.java)
-
+        viewModel.uiEvent.test {
+            assertThat(awaitItem()).isEqualTo(LoginUIEvent.LoginSuccess)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -186,7 +179,6 @@ class LoginViewModelTest {
     fun `when error anonymous login then state idle`() = runTest(testDispatcher) {
         coEvery { getLoggedUserUseCase() } returns Result.Success(null)
 
-        val credentialResponse = mockk<GetCredentialResponse>()
         coEvery {
             loginUseCase(
                 LoginMethod.AnonymousLogin
@@ -194,19 +186,10 @@ class LoginViewModelTest {
         } returns Result.Failure(LoginError.GenericLoginError)
 
         advanceUntilIdle()
+        viewModel.login(LoginMethod.AnonymousLogin)
 
-        viewModel.uiState.test {
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Idle::class.java)
-
-            viewModel.login(LoginMethod.AnonymousLogin)
-            assertThat(awaitItem()).isInstanceOf(LoginUIState.Loading::class.java)
-
-            val idleState = awaitItem()
-            assertThat(idleState).isInstanceOf(LoginUIState.Idle::class.java)
-            assertThat((idleState as LoginUIState.Idle).error).isNotNull()
-
+        viewModel.uiEvent.test {
+            assertThat(awaitItem()).isEqualTo(LoginUIEvent.Error(LoginError.GenericLoginError))
             cancelAndIgnoreRemainingEvents()
         }
     }

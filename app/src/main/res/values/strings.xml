@@ -6,7 +6,9 @@
     <string name="anonymous_button">Continue without login</string>
     <string name="generic_login_error">"Login error!"</string>
     <string name="get_logged_user_error">"There was an error retrieving the logged user. Please login again."</string>
+    <string name="logout_error">"Logout error"</string>
 
     <!-- Home screen -->
     <string name="logout_button">Logout</string>
+    <string name="logged_user">Hello %s!</string>
 </resources>
