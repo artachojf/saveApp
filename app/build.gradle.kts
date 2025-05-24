@@ -1,15 +1,20 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.serialization") version("1.9.0")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
     namespace = "es.artachojf.saveapp"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "es.artachojf.saveapp"
-        minSdk = 30
+        minSdk = 34
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -18,6 +23,27 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        android.buildFeatures.buildConfig = true
+
+
+        val keystoreFile = project.rootProject.file("environment.properties")
+        val properties = Properties()
+        properties.load(keystoreFile.inputStream())
+        buildConfigField(
+            type = "String",
+            name = "SUPABASE_API_KEY",
+            value = properties.getProperty("SUPABASE_API_KEY") ?: "")
+        buildConfigField(
+            type = "String",
+            name = "SUPABASE_URL",
+            value = properties.getProperty("SUPABASE_URL") ?: ""
+        )
+        buildConfigField(
+            type = "String",
+            name = "GOOGLE_CLIENT_ID",
+            value = properties.getProperty("GOOGLE_CLIENT_ID") ?: ""
+        )
     }
 
     buildTypes {
@@ -50,20 +76,58 @@ android {
 }
 
 dependencies {
+    val navVersion = "2.8.9"
+    val kotlinSerialization = "1.6.3"
+    val hiltVersion = "2.51.1"
+    val supabaseVersion = "2.6.1"
+    val ktorVersion = "2.3.13"
+    val credentialsManagerVersion = "1.1.1"
+
+    val junitVersion = "4.13.2"
+    val mockkVersion = "1.13.17"
+    val coroutinesVersion = "1.8.1"
+    val truthVersion = "1.4.4"
+    val turbineVersion = "1.2.0"
 
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.activity:activity-compose:1.10.1")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    testImplementation("junit:junit:4.13.2")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation("androidx.navigation:navigation-compose:$navVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerialization")
+
+    implementation("com.google.dagger:hilt-android:$hiltVersion")
+    kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    implementation(platform("io.github.jan-tennert.supabase:bom:$supabaseVersion"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.ktor:ktor-client-android:$ktorVersion")
+
+    implementation("androidx.credentials:credentials:$credentialsManagerVersion")
+    implementation("androidx.credentials:credentials-play-services-auth:$credentialsManagerVersion")
+    implementation("com.google.android.libraries.identity.googleid:googleid:$credentialsManagerVersion")
+
+    testImplementation("junit:junit:$junitVersion")
+    testImplementation("io.mockk:mockk:${mockkVersion}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion") {
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-debug")
+    }
+    testImplementation("com.google.truth:truth:$truthVersion")
+    testImplementation("app.cash.turbine:turbine:$turbineVersion")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+kapt {
+    correctErrorTypes = true
 }
