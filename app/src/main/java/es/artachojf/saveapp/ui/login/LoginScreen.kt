@@ -17,14 +17,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.credentials.CredentialManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import es.artachojf.saveapp.R
 import es.artachojf.saveapp.core.utils.LoginUtils
 import es.artachojf.saveapp.domain.login.LoginError
 import es.artachojf.saveapp.domain.login.login.model.LoginMethod
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -84,22 +81,12 @@ fun IdleLoginScreen(
     val context = LocalContext.current
 
     val onGoogleLogin = {
-        val credentialManager = CredentialManager.create(context)
-
-        val (rawNonce, hashedNonce) = LoginUtils.generateNonce()
-        val request = LoginUtils.generateGoogleCredentialRequest(hashedNonce)
-
-        coroutine.launch(Dispatchers.IO) {
-            try {
-                val result = credentialManager.getCredential(
-                    request = request,
-                    context = context,
-                )
-                login(LoginMethod.GoogleLogin(result, rawNonce))
-            } catch (e: Exception) {
-                e.printStackTrace()
-                //TODO: Gestion excepciones
-            }
+        (login as? ((LoginMethod.GoogleLogin) -> Unit))?.let {
+            LoginUtils.launchGoogleCredentialManager(
+                context = context,
+                coroutine = coroutine,
+                onLogin = it
+            )
         }
     }
 

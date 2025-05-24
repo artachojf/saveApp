@@ -6,6 +6,11 @@ import io.github.jan.supabase.gotrue.user.UserInfo
 fun UserInfo.toDomain(): UserBusiness {
     return UserBusiness(
         id = id,
-        email = email
+        email = email,
+        isAnonymous = isAnonymousLogin()
     )
+}
+
+fun UserInfo.isAnonymousLogin(): Boolean {
+    return appMetadata?.containsKey("provider") == false
 }

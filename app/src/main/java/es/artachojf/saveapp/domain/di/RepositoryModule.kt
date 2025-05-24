@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import es.artachojf.saveapp.data.login.LoginMemoryDataSource
 import es.artachojf.saveapp.data.login.LoginSupabaseDataSource
 import es.artachojf.saveapp.data.login.login.LoginRepositoryImpl
 import es.artachojf.saveapp.data.login.logout.LogoutRepositoryImpl
@@ -19,24 +20,27 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideLoginRepository(
-        dataSource: LoginSupabaseDataSource
+        dataSource: LoginSupabaseDataSource,
+        memoryDataSource: LoginMemoryDataSource
     ): LoginRepository {
-        return LoginRepositoryImpl(dataSource)
+        return LoginRepositoryImpl(dataSource,)
     }
 
     @Provides
     @Singleton
     fun provideLoggedUserRepository(
-        dataSource: LoginSupabaseDataSource
+        dataSource: LoginSupabaseDataSource,
+        memoryDataSource: LoginMemoryDataSource
     ): LoggedUserRepository {
-        return LoggedUserRepositoryImpl(dataSource)
+        return LoggedUserRepositoryImpl(dataSource, memoryDataSource)
     }
 
     @Provides
     @Singleton
     fun provideLogoutRepository(
-        dataSource: LoginSupabaseDataSource
+        dataSource: LoginSupabaseDataSource,
+        memoryDataSource: LoginMemoryDataSource
     ): LogoutRepository {
-        return LogoutRepositoryImpl(dataSource)
+        return LogoutRepositoryImpl(dataSource, memoryDataSource)
     }
 }
