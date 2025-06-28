@@ -7,9 +7,12 @@ import es.artachojf.saveapp.core.Result
 import es.artachojf.saveapp.domain.login.LoginError
 import es.artachojf.saveapp.domain.login.logout.Logout
 import es.artachojf.saveapp.domain.login.user.GetLoggedUser
+import es.artachojf.saveapp.domain.movement.GetMovements
 import es.artachojf.saveapp.ui.di.DispatcherIO
+import es.artachojf.saveapp.ui.home.model.HomeIntent
 import es.artachojf.saveapp.ui.home.model.HomeUIEvent
 import es.artachojf.saveapp.ui.home.model.HomeUIState
+import es.artachojf.saveapp.ui.home.model.toPresentation
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,10 +30,11 @@ class HomeViewModel @Inject constructor(
     @DispatcherIO private val dispatcher: CoroutineDispatcher,
     private val logout: Logout,
     private val getLoggedUser: GetLoggedUser,
+    private val getMovements: GetMovements
 ): ViewModel() {
     private val _uiState = MutableStateFlow(HomeUIState())
     val uiState: StateFlow<HomeUIState> = _uiState
-        .onStart { retrieveLoggedUser() }
+        .onStart { getAllMovements() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -40,7 +44,13 @@ class HomeViewModel @Inject constructor(
     private val _uiEvent: Channel<HomeUIEvent> = Channel()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    fun onLogout() {
+    fun onIntent(intent: HomeIntent) {
+        when (intent) {
+            is HomeIntent.OnLogoutClick -> onLogout()
+        }
+    }
+
+    private fun onLogout() {
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch(dispatcher) {
             when (logout()) {
@@ -68,6 +78,23 @@ class HomeViewModel @Inject constructor(
                 }
             }
             _uiState.update { it.copy(isLoading = false, loggedUser = loggedUser) }
+        }
+    }
+
+    private fun getAllMovements() {
+        _uiState.update { it.copy(isLoading = true) }
+        viewModelScope.launch(dispatcher) {
+            val list = when (val result = getMovements()) {
+                is Result.Success -> {
+                    result.data
+                }
+
+                is Result.Failure -> {
+                    _uiEvent.send(HomeUIEvent.Error(LoginError.GenericLoginError)) //TODO cambiar esto
+                    emptyList()
+                }
+            }
+            _uiState.update { it.copy(isLoading = false, movements = list.map { it.toPresentation() }) }
         }
     }
 }

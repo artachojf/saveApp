@@ -9,9 +9,12 @@ import es.artachojf.saveapp.data.login.LoginSupabaseDataSource
 import es.artachojf.saveapp.data.login.login.LoginRepositoryImpl
 import es.artachojf.saveapp.data.login.logout.LogoutRepositoryImpl
 import es.artachojf.saveapp.data.login.user.LoggedUserRepositoryImpl
+import es.artachojf.saveapp.data.movement.MovementRepositoryImpl
+import es.artachojf.saveapp.data.movement.MovementSupabaseDataSource
 import es.artachojf.saveapp.domain.login.login.LoginRepository
 import es.artachojf.saveapp.domain.login.logout.LogoutRepository
 import es.artachojf.saveapp.domain.login.user.LoggedUserRepository
+import es.artachojf.saveapp.domain.movement.MovementRepository
 import javax.inject.Singleton
 
 @Module
@@ -42,5 +45,13 @@ object RepositoryModule {
         memoryDataSource: LoginMemoryDataSource
     ): LogoutRepository {
         return LogoutRepositoryImpl(dataSource, memoryDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMovementRepository(
+        dataSource: MovementSupabaseDataSource
+    ): MovementRepository {
+        return MovementRepositoryImpl(dataSource)
     }
 }

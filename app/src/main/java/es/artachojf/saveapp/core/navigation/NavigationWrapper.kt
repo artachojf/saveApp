@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import es.artachojf.saveapp.ui.home.HomeScreen
+import es.artachojf.saveapp.ui.home.HomeScreenRoot
 import es.artachojf.saveapp.ui.login.LoginScreen
 
 @Composable
@@ -28,7 +28,7 @@ fun NavigationWrapper() {
         }
 
         composable<Home> {
-            HomeScreen(
+            HomeScreenRoot(
                 navigateToLogin = {
                     navController.navigate(
                         route = Login,
