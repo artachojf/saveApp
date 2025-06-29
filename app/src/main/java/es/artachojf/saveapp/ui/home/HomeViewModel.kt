@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.round
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -47,6 +48,7 @@ class HomeViewModel @Inject constructor(
     fun onIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.OnLogoutClick -> onLogout()
+            else -> {}
         }
     }
 
@@ -94,7 +96,14 @@ class HomeViewModel @Inject constructor(
                     emptyList()
                 }
             }
-            _uiState.update { it.copy(isLoading = false, movements = list.map { it.toPresentation() }) }
+            val accountBalance = round(list.sumOf { it.amount } * 100) / 100f
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    movements = list.map { it.toPresentation() },
+                    accountBalance = accountBalance.toString()
+                )
+            }
         }
     }
 }

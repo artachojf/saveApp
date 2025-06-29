@@ -11,4 +11,8 @@
     <!-- Home screen -->
     <string name="logout_button">Logout</string>
     <string name="logged_user">Hello %s!</string>
+    <string name="home_empty_state">There are no movements yet</string>
+    <string name="add_movement_content_description">Add new movement</string>
+    <string name="home_account_balance_content_description">Current account balance</string>
+    <string name="home_account_balance_value">%s €</string>
 </resources>

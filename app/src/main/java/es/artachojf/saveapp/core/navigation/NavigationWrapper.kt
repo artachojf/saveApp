@@ -7,6 +7,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import es.artachojf.saveapp.ui.home.HomeScreenRoot
 import es.artachojf.saveapp.ui.login.LoginScreen
+import es.artachojf.saveapp.ui.movement.detail.MovementDetailScreen
+import es.artachojf.saveapp.ui.movement.form.MovementFormScreen
 
 @Composable
 fun NavigationWrapper() {
@@ -38,8 +40,26 @@ fun NavigationWrapper() {
                             }
                         }
                     )
+                },
+                navigateToMovementForm = {
+                    navController.navigate(
+                        route = MovementForm
+                    )
+                },
+                navigateToMovementDetail = {
+                    navController.navigate(
+                        route = MovementDetail
+                    )
                 }
             )
+        }
+
+        composable<MovementDetail> {
+            MovementDetailScreen()
+        }
+
+        composable<MovementForm> {
+            MovementFormScreen()
         }
     }
 }
