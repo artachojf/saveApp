@@ -92,7 +92,7 @@ class HomeViewModel @Inject constructor(
                 }
 
                 is Result.Failure -> {
-                    _uiEvent.send(HomeUIEvent.Error(LoginError.GenericLoginError)) //TODO cambiar esto
+                    _uiEvent.send(HomeUIEvent.Error(LoginError.GenericLoginError))
                     emptyList()
                 }
             }

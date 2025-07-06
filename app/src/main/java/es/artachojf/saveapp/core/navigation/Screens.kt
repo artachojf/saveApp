@@ -12,4 +12,4 @@ object Home
 object MovementDetail
 
 @Serializable
-object MovementForm
+data class MovementForm(val movementId: Int?)

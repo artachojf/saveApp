@@ -4,6 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import es.artachojf.saveapp.data.category.CategoryRepositoryImpl
+import es.artachojf.saveapp.data.category.CategorySupabaseDataSource
 import es.artachojf.saveapp.data.login.LoginMemoryDataSource
 import es.artachojf.saveapp.data.login.LoginSupabaseDataSource
 import es.artachojf.saveapp.data.login.login.LoginRepositoryImpl
@@ -11,6 +13,7 @@ import es.artachojf.saveapp.data.login.logout.LogoutRepositoryImpl
 import es.artachojf.saveapp.data.login.user.LoggedUserRepositoryImpl
 import es.artachojf.saveapp.data.movement.MovementRepositoryImpl
 import es.artachojf.saveapp.data.movement.MovementSupabaseDataSource
+import es.artachojf.saveapp.domain.category.CategoryRepository
 import es.artachojf.saveapp.domain.login.login.LoginRepository
 import es.artachojf.saveapp.domain.login.logout.LogoutRepository
 import es.artachojf.saveapp.domain.login.user.LoggedUserRepository
@@ -53,5 +56,13 @@ object RepositoryModule {
         dataSource: MovementSupabaseDataSource
     ): MovementRepository {
         return MovementRepositoryImpl(dataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryRepository(
+        dataSource: CategorySupabaseDataSource
+    ): CategoryRepository {
+        return CategoryRepositoryImpl(dataSource)
     }
 }

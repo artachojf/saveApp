@@ -64,7 +64,7 @@ import kotlinx.datetime.LocalDateTime
 @Composable
 fun HomeScreenRoot(
     navigateToLogin: () -> Unit,
-    navigateToMovementForm: () -> Unit,
+    navigateToMovementForm: (Int?) -> Unit,
     navigateToMovementDetail: (Int) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -94,7 +94,7 @@ fun HomeScreenRoot(
         state = uiState
     ) { intent ->
         when (intent) {
-            is HomeIntent.OnGoToMovementForm -> navigateToMovementForm()
+            is HomeIntent.OnGoToMovementForm -> navigateToMovementForm(intent.movementId)
 
             is HomeIntent.OnGoToMovementDetail -> navigateToMovementDetail(intent.movementId)
 
@@ -151,7 +151,7 @@ fun MovementsList(
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = {
-                        onIntent(HomeIntent.OnGoToMovementForm)
+                        onIntent(HomeIntent.OnGoToMovementForm())
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,

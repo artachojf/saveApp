@@ -41,14 +41,14 @@ fun NavigationWrapper() {
                         }
                     )
                 },
-                navigateToMovementForm = {
+                navigateToMovementForm = { movementId ->
                     navController.navigate(
-                        route = MovementForm
+                        route = MovementForm(movementId)
                     )
                 },
                 navigateToMovementDetail = {
                     navController.navigate(
-                        route = MovementDetail
+                        route = MovementForm(it) //TODO acceso provisional a edicion
                     )
                 }
             )
@@ -59,7 +59,11 @@ fun NavigationWrapper() {
         }
 
         composable<MovementForm> {
-            MovementFormScreen()
+            MovementFormScreen(
+                navigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

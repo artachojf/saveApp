@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">SaveApp</string>
 
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="go_back_content_description">Go back</string>
+
     <!-- Login screen -->
     <string name="google_button">Sign in with Google</string>
     <string name="anonymous_button">Continue without login</string>
@@ -15,4 +19,20 @@
     <string name="add_movement_content_description">Add new movement</string>
     <string name="home_account_balance_content_description">Current account balance</string>
     <string name="home_account_balance_value">%s €</string>
+
+    <!-- Movement form screen -->
+    <string name="movement_form_title">New Movement</string>
+    <string name="movement_form_income">Income</string>
+    <string name="movement_form_expense">Expense</string>
+    <string name="movement_form_amount_field">Amount</string>
+    <string name="movement_form_category_field">Category</string>
+    <string name="movement_form_date_field">Date</string>
+    <string name="movement_form_description_field">Description</string>
+    <string name="movement_form_title_field">Title</string>
+    <string name="movement_form_get_categories_failure">Error getting the categories. Please try it again a few minutes later.</string>
+    <string name="movement_form_get_movement_failure">Error getting movement</string>
+    <string name="movement_form_save_movement_success">New movement created successfully!</string>
+    <string name="movement_form_save_movement_failure">Error creating new movement</string>
+    <string name="movement_form_update_movement_success">Movement updated successfully!</string>
+    <string name="movement_form_update_movement_failure">Error updating movement</string>
 </resources>
